@@ -1,5 +1,5 @@
 import {createZ80, resetZ80, runZ80, irqZ80} from "./z80.js";
-import {createTape, parseTape, resetTape, startTape, rearmTape, stopTape, earLevel, nextBlock, describeBlocks, rewindBlock, forwardBlock} from "./tape.js";
+import {createTape, parseTape, resetTape, startTape, rearmTape, earLevel, nextBlock, describeBlocks, rewindBlock, forwardBlock} from "./tape.js";
 import {parseDck} from "./dock.js";
 import {createAy, resetAy, aySeek, ayRunTo, ayRunSilent, ayTakeSample, ayWriteReg, ayReadReg} from "./ay.js";
 
@@ -20,6 +20,14 @@ const audioCap = 8192;
 const earMix          = 0.25;
 const tapePollReads   = 8;
 const tapePollGapT    = 256;
+// While a tape plays, a ROM-style edge loop may spend more than tapePollGapT
+// between samples (LD-EDGE's delay loop: up to ~550 T measured). A run only
+// counts as a loader once it is longer than a keyboard scan (8 row reads).
+const tapePlayGapT    = 1024;
+// A ROM-style LD-BYTES waits about a second after the first edge without
+// reading EAR (LD-WAIT: ld hl,$0415 / djnz), so a playing tape is only stopped
+// after this much loader silence. The rearm delay stays tapeLoaderIdleT.
+const tapePlayIdleT   = cpuHz * 3 / 2;
 const tapeLoaderIdleT = cpuHz / 10;
 
 // This is the state reached by the bundled TS2068 ROMs after LOAD "" enters
@@ -165,6 +173,7 @@ const windowStartT = activeStartT - scrX / tPerColumn;
  *   port:   number,
  *   firstT: number,
  *   lastT:  number,
+ *   prevT:  number,
  *   count:  number,
  * }} TapePoll
  */
@@ -274,6 +283,7 @@ export function createMachine(keyMatrix, joystick) {
             port: -1,
             firstT: 0,
             lastT: 0,
+            prevT: 0,
             count: 0,
         },
         cpu: createZ80(),
@@ -1019,15 +1029,21 @@ function noteTapeRead(m, port) {
             poll.lastT = tstates;
             return;
         }
+        // The gap is measured from the previous read, not from lastT (the last
+        // read that proved a loader), or one long gap would freeze lastT and
+        // stop the tape mid-load.
         const playingPort = port & 0xFFFF;
-        if (poll.count > 0 && poll.pc === m.cpu.pc && poll.port === playingPort && gap <= tapePollGapT) {
+        if (poll.count > 0 && poll.pc === m.cpu.pc && poll.port === playingPort && tstates - poll.prevT <= tapePlayGapT) {
             poll.count += 1;
-            poll.lastT = tstates;
+            if (poll.count > tapePollReads) {
+                poll.lastT = tstates;
+            }
         } else {
             poll.pc = m.cpu.pc;
             poll.port = playingPort;
             poll.count = 1;
         }
+        poll.prevT = tstates;
         return;
     }
     if (tape.state !== "ready") {
@@ -1097,10 +1113,13 @@ function stopTapeIfLoaderIdle(m, untilT) {
     if (romTapeLoaderActive(m)) {
         return;
     }
-    if (untilT - m.tapePoll.lastT < tapeLoaderIdleT) {
+    if (untilT - m.tapePoll.lastT < tapePlayIdleT) {
         return;
     }
-    stopTape(m.tape);
+    // Rewind to the start of the block rather than pausing mid-leader: a
+    // ROM-style loader that resumes the tape spends its first second in
+    // LD-WAIT, so the rest of a cut leader would go by unheard.
+    resetTape(m.tape);
     setUlaLevel(m);
 }
 
@@ -1110,6 +1129,7 @@ function resetTapePoll(m) {
     m.tapePoll.port = -1;
     m.tapePoll.firstT = m.tstates;
     m.tapePoll.lastT = m.tstates;
+    m.tapePoll.prevT = m.tstates;
     m.tapePoll.count = 0;
 }
 
