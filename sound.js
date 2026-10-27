@@ -67,7 +67,7 @@ export function initSound(framesPerSecond, onDone) {
         return;
     }
 
-    context.audioWorklet.addModule("sound.worklet.js").then(
+    context.audioWorklet.addModule(new URL("sound.worklet.js", import.meta.url)).then(
         function () {
             const frameSampleCount = Math.round(context.sampleRate / framesPerSecond);
             /** @type {Sfx} */
