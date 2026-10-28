@@ -362,7 +362,7 @@ beam renders as bars that break mid-line, as on hardware. Bit 6 of port `FF` inh
 - `roms/` - Machine default ROM files and the alternative Leap ROM files.
 
 The Leap ROM files are the 2068-Leap V2 release
-[v2.0.1-emu.1](https://github.com/nchiker/2068-Leap/releases/tag/v2.0.1-emu.1)
+[v2.1.0-emu.1](https://github.com/nchiker/2068-Leap/releases/tag/v2.1.0-emu.1)
 from [https://github.com/nchiker/2068-Leap](https://github.com/nchiker/2068-Leap).
 The Leap-C ROM files (`leapc-0.rom`, `leapc-1.rom`) are the 2068-Leap-C public beta
 [v1.0.0-beta.2](https://github.com/nchiker/2068-Leap-C/releases/tag/v1.0.0-beta.2)
