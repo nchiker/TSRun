@@ -16,9 +16,9 @@ LeapForth ROMS (`leapforth-0.rom`, `leapforth-1.rom`) are the 2068-Leap-Forth re
 | `leapforth-0.rom` | `forth_boot_rom0.bin` (16K HOME) | `730c86d086c53854fd5926749a9eec904b4ed4afcd0a6d0797c53b462765b9f5` |
 | `leapforth-1.rom` | `graphics_exrom.bin` (8K EXROM) | `fd877dd00a2f21d5f24d48177c600d62f7bd478723963bb73758445a33569161` |
 
-Leap-C ROMS (`leapc-0.rom`, `leapc-1.rom`) are the 2068-Leap-C public beta [v1.0.0-beta.2](https://github.com/nchiker/2068-Leap-C/releases/tag/v1.0.0-beta.2) from the [2068-Leap-C repo](https://github.com/nchiker/2068-Leap-C), copied unchanged from `roms/leapc_home.bin` and `roms/leapc_exrom.bin` of `leapc-1.0.0-beta.2-emulators.zip`, under the MIT license (since beta.2 they contain no code derived from the TS2068 ROM: see that repository's NOTICE).
+Leap-C ROMS (`leapc-0.rom`, `leapc-1.rom`) are the 2068-Leap-C release [v1.0.0](https://github.com/nchiker/2068-Leap-C/releases/tag/v1.0.0) from the [2068-Leap-C repo](https://github.com/nchiker/2068-Leap-C), copied unchanged from `roms/leapc_home.bin` and `roms/leapc_exrom.bin` of `leapc-1.0.0-emulators.zip`, under the MIT license (they contain no code derived from the TS2068 ROM: see that repository's NOTICE).
 
 | File | Release file | SHA-256 |
 | --- | --- | --- |
-| `leapc-0.rom` | `leapc_home.bin` (16K HOME) | `043becf4b2e58e9783ef83b8188648214ed6a84e83a13709458439385df5fba5` |
-| `leapc-1.rom` | `leapc_exrom.bin` (8K EXROM) | `97fe95236ff16b7ccb1c5e138d228d67ca25bf31d7b86bdbd15995c85ac207e7` |
+| `leapc-0.rom` | `leapc_home.bin` (16K HOME) | `d2b18eaa6b3e100e80b1159aedc3a382a8c7ae552566205dab301739e8f3ef98` |
+| `leapc-1.rom` | `leapc_exrom.bin` (8K EXROM) | `02790ebe3bf851a749b8ff6810db5bf76bd39518ebda7731b47b4a5239bc4847` |
