@@ -367,3 +367,6 @@ from [https://github.com/nchiker/2068-Leap](https://github.com/nchiker/2068-Leap
 The Leap-C ROM files (`leapc-0.rom`, `leapc-1.rom`) are the 2068-Leap-C public beta
 [v1.0.0-beta.2](https://github.com/nchiker/2068-Leap-C/releases/tag/v1.0.0-beta.2)
 from [https://github.com/nchiker/2068-Leap-C](https://github.com/nchiker/2068-Leap-C).
+The Leap-Forth ROM files (`leapforth-0.rom`, `leapforth-1.rom`) are the 2068-Leap-Forth release
+[v2.0](https://github.com/nchiker/2068-Leap-Forth/releases/tag/v2.0)
+from [https://github.com/nchiker/2068-Leap-Forth](https://github.com/nchiker/2068-Leap-Forth).

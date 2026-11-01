@@ -9,7 +9,12 @@ Leap ROMS (`leap-0.rom`, `leap-1.rom`) are the 2068-Leap V2 release [v2.1.0-emu.
 | `leap-0.rom` | `leap_v2_home.bin` (16K HOME) | `8c3d6c8108b653114ce4fffcd9695ac9883a8068664bffd21524b7ac1d167df0` |
 | `leap-1.rom` | `leap_v2_exrom.bin` (8K EXROM) | `e46e2065ee863f0569c3e47cdc975af0081b4e7227b690977eed4fb7d7020f9d` |
 
-LeapForth ROMS are part of the active development and are located at [2068-Leap-Forth repo](https://github.com/nchiker/2068-Leap-Forth) under MIT license.
+LeapForth ROMS (`leapforth-0.rom`, `leapforth-1.rom`) are the 2068-Leap-Forth release [v2.0](https://github.com/nchiker/2068-Leap-Forth/releases/tag/v2.0) from the [2068-Leap-Forth repo](https://github.com/nchiker/2068-Leap-Forth) under MIT license, copied unchanged from `roms/forth_boot_rom0.bin` and `roms/graphics_exrom.bin` in `2068-Forth-v2.0.zip`:
+
+| File | Release file | SHA-256 |
+| --- | --- | --- |
+| `leapforth-0.rom` | `forth_boot_rom0.bin` (16K HOME) | `730c86d086c53854fd5926749a9eec904b4ed4afcd0a6d0797c53b462765b9f5` |
+| `leapforth-1.rom` | `graphics_exrom.bin` (8K EXROM) | `fd877dd00a2f21d5f24d48177c600d62f7bd478723963bb73758445a33569161` |
 
 Leap-C ROMS (`leapc-0.rom`, `leapc-1.rom`) are the 2068-Leap-C public beta [v1.0.0-beta.2](https://github.com/nchiker/2068-Leap-C/releases/tag/v1.0.0-beta.2) from the [2068-Leap-C repo](https://github.com/nchiker/2068-Leap-C), copied unchanged from `roms/leapc_home.bin` and `roms/leapc_exrom.bin` of `leapc-1.0.0-beta.2-emulators.zip`, under the MIT license (since beta.2 they contain no code derived from the TS2068 ROM: see that repository's NOTICE).
 
