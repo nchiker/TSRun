@@ -2,12 +2,12 @@ These ROM files are vendored 3rd party files.
 
 TS2060 ROMS are partially released by Amstrad free for non-commercial purposes and partially abandon-ware as far as I could verify.
 
-Leap ROMS (`leap-0.rom`, `leap-1.rom`) are the 2068-Leap V2 release [v2.1.1-emu.1](https://github.com/nchiker/2068-Leap/releases/tag/v2.1.1-emu.1) from the [2068-Leap repo](https://github.com/nchiker/2068-Leap) under MIT license, copied unchanged from `roms/leap_v2_home.bin` and `roms/leap_v2_exrom.bin` in `2068-Leap-V2-v2.1.1-emu.1.zip`:
+Leap ROMS (`leap-0.rom`, `leap-1.rom`) are the 2068-Leap V2 release [v2.1.2-emu.1](https://github.com/nchiker/2068-Leap/releases/tag/v2.1.2-emu.1) from the [2068-Leap repo](https://github.com/nchiker/2068-Leap) under MIT license, copied unchanged from `roms/leap_v2_home.bin` and `roms/leap_v2_exrom.bin` in `2068-Leap-V2-v2.1.2-emu.1.zip`:
 
 | File | Release file | SHA-256 |
 | --- | --- | --- |
-| `leap-0.rom` | `leap_v2_home.bin` (16K HOME) | `c79ce1cfe1d757036fb7c53974d53dd56117ec2d231c7b4c5f2e65c510dc295a` |
-| `leap-1.rom` | `leap_v2_exrom.bin` (8K EXROM) | `ba7f0869d3ea8641cbcdc25f62b131a1cc1e8614fd083a873d77313a00d5a1b5` |
+| `leap-0.rom` | `leap_v2_home.bin` (16K HOME) | `5d2aa71dfe944811bcf58247952cb601e28a5c5fa2fac48508fed13579aa94f3` |
+| `leap-1.rom` | `leap_v2_exrom.bin` (8K EXROM) | `c52f966998a6af48851819a8b738c8c0585c8523c64e9ca3ec7e491bc91b4e75` |
 
 LeapForth ROMS (`leapforth-0.rom`, `leapforth-1.rom`) are the 2068-Leap-Forth release [v2.0.1](https://github.com/nchiker/2068-Leap-Forth/releases/tag/v2.0.1) from the [2068-Leap-Forth repo](https://github.com/nchiker/2068-Leap-Forth) under MIT license, copied unchanged from `roms/forth_boot_rom0.bin` and `roms/graphics_exrom.bin` in `2068-Forth-v2.0.1.zip`:
 
