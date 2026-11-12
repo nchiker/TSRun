@@ -179,6 +179,21 @@ const windowStartT = activeStartT - scrX / tPerColumn;
  */
 
 /**
+ * A Kempston mouse on the expansion bus. Ports whose low byte is $DF: $FADF
+ * buttons (A8 = 0; active low, bit 0 right, bit 1 left, bit 2 middle), $FBDF
+ * the x counter (A8 = 1, A10 = 0), $FFDF the y counter (A8 = 1, A10 = 1;
+ * grows as the mouse moves up). Counters are 8 bits and wrap. Detached, the
+ * ports float high as before.
+ *
+ * @typedef {{
+ *   attached: boolean,
+ *   x:        number,
+ *   y:        number,
+ *   buttons:  number,
+ * }} KempstonMouse
+ */
+
+/**
  * @typedef {{
  *   homeRom:     Uint8Array,
  *   exRom:       Uint8Array,
@@ -200,6 +215,7 @@ const windowStartT = activeStartT - scrX / tPerColumn;
  *   dfileEnd:    number,
  *   keyMatrix:   Uint8Array,
  *   joystick:    Uint8Array,
+ *   mouse:       KempstonMouse,
  *   tstates:     number,
  *   stepAdded:   number,
  *   frameStart:  number,
@@ -273,6 +289,7 @@ export function createMachine(keyMatrix, joystick) {
         dfileEnd:   dfile0 + dfileSize,
         keyMatrix,
         joystick,
+        mouse:      {attached: false, x: 0, y: 0, buttons: 0xFF},
         tstates:    0,
         stepAdded:  0,
         frameStart: 0,
@@ -915,7 +932,27 @@ function ioRead(m, port) {
     if ((p & 1) === 0) {
         return readKeys(m, port);
     }
+    if (p === 0xDF && m.mouse.attached) {
+        return readMouse(m.mouse, port);
+    }
     return 0xFF;
+}
+
+/**
+ * The Kempston mouse decodes A8 and A10 within the $DF ports.
+ *
+ * @param {KempstonMouse} mouse
+ * @param {number} port
+ * @returns {number}
+ */
+function readMouse(mouse, port) {
+    if ((port & 0x0100) === 0) {
+        return mouse.buttons & 0xFF;
+    }
+    if ((port & 0x0400) === 0) {
+        return mouse.x & 0xFF;
+    }
+    return mouse.y & 0xFF;
 }
 
 /**
