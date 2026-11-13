@@ -194,6 +194,37 @@ const windowStartT = activeStartT - scrX / tPerColumn;
  */
 
 /**
+ * An emulator-only host bridge (LeapG docs/FILES.md 4.1) on two odd ports that
+ * no TS2068 device decodes: $6F command / status and $6D data. OUT $6F starts
+ * command n; the bytes that command takes follow on OUT $6D (1 pick and 5 close
+ * take none; 2 open: mode, name length, name codes; 3 read: count low, high;
+ * 4 write: count low, high, the bytes; 0 abort takes none). When they are all
+ * in, TSRun calls m.host.command(n, bytes, answer). The host returns
+ * {status, data} to answer at once, or null to answer later through
+ * answer(status, data) (bit 7 of $6F, busy, reads 1 meanwhile). IN $6F gives
+ * busy and the last status (bits 0-6); IN $6D the next byte of the answer's
+ * data, $00 when none is left. A new command drops what is left of the last
+ * answer, and one still pending (its late answer is ignored). With m.host
+ * null both ports float high.
+ *
+ * @typedef {{status: number, data?: ArrayLike<number>}} HostAnswer
+ * @typedef {{
+ *   command: function(number, Uint8Array, function(number, ArrayLike<number>=): void): (HostAnswer | null),
+ * }} HostBridge
+ * @typedef {{
+ *   cmd:    number,
+ *   inBuf:  Uint8Array,
+ *   inLen:  number,
+ *   want:   number,
+ *   status: number,
+ *   busy:   boolean,
+ *   gen:    number,
+ *   out:    Uint8Array,
+ *   outPos: number,
+ * }} BridgeState
+ */
+
+/**
  * @typedef {{
  *   homeRom:     Uint8Array,
  *   exRom:       Uint8Array,
@@ -216,6 +247,8 @@ const windowStartT = activeStartT - scrX / tPerColumn;
  *   keyMatrix:   Uint8Array,
  *   joystick:    Uint8Array,
  *   mouse:       KempstonMouse,
+ *   host:        HostBridge | null,
+ *   bridge:      BridgeState,
  *   tstates:     number,
  *   stepAdded:   number,
  *   frameStart:  number,
@@ -290,6 +323,8 @@ export function createMachine(keyMatrix, joystick) {
         keyMatrix,
         joystick,
         mouse:      {attached: false, x: 0, y: 0, buttons: 0xFF},
+        host:       null,
+        bridge:     newBridge(),
         tstates:    0,
         stepAdded:  0,
         frameStart: 0,
@@ -401,6 +436,7 @@ export function resetMachine(m) {
     m.ulaFiltered = 0;
     resetTape(m.tape);
     resetTapePoll(m);
+    m.bridge = newBridge();
     setUlaLevel(m);
     m.audioFill = 0;
     resyncSound(m);
@@ -935,7 +971,108 @@ function ioRead(m, port) {
     if (p === 0xDF && m.mouse.attached) {
         return readMouse(m.mouse, port);
     }
+    if ((p === 0x6F || p === 0x6D) && m.host !== null) {
+        return readBridge(m.bridge, p);
+    }
     return 0xFF;
+}
+
+/** @returns {BridgeState} */
+function newBridge() {
+    return {
+        cmd: -1, inBuf: new Uint8Array(0), inLen: 0, want: 0, status: 0,
+        busy: false, gen: 0, out: new Uint8Array(0), outPos: 0,
+    };
+}
+
+/**
+ * @param {BridgeState} b
+ * @param {number} p
+ * @returns {number}
+ */
+function readBridge(b, p) {
+    if (p === 0x6F) {
+        return (b.busy ? 0x80 : 0) | (b.status & 0x7F);
+    }
+    if (b.outPos < b.out.length) {
+        const v = b.out[b.outPos];
+        b.outPos += 1;
+        return v;
+    }
+    return 0;
+}
+
+/**
+ * @param {Machine} m
+ * @param {number} p
+ * @param {number} value
+ */
+function writeBridge(m, p, value) {
+    const b = m.bridge;
+    if (p === 0x6F) {
+        b.gen += 1;
+        b.busy = false;
+        b.out = new Uint8Array(0);
+        b.outPos = 0;
+        b.cmd = value;
+        b.inLen = 0;
+        b.inBuf = new Uint8Array(258);
+        b.want = (value === 2 || value === 3 || value === 4) ? 2 : 0;
+        if (b.want === 0) {
+            runBridge(m);
+        }
+        return;
+    }
+    if (b.cmd < 0 || b.inLen >= b.want) {
+        return;
+    }
+    b.inBuf[b.inLen] = value;
+    b.inLen += 1;
+    if (b.inLen === 2) {
+        if (b.cmd === 2) {
+            b.want = 2 + value;
+        } else if (b.cmd === 4) {
+            b.want = 2 + (b.inBuf[0] | (value << 8));
+            const buf = new Uint8Array(b.want);
+            buf.set(b.inBuf.subarray(0, 2));
+            b.inBuf = buf;
+        }
+    }
+    if (b.inLen >= b.want) {
+        runBridge(m);
+    }
+}
+
+/**
+ * A command's bytes are in: ask the host.
+ *
+ * @param {Machine} m
+ */
+function runBridge(m) {
+    const b = m.bridge;
+    const host = m.host;
+    const cmd = b.cmd;
+    const bytes = b.inBuf.slice(0, b.inLen);
+    b.cmd = -1;
+    if (host === null) {
+        return;
+    }
+    const gen = b.gen;
+    b.busy = true;
+    /** @type {function(number, ArrayLike<number>=): void} */
+    const answer = (status, data) => {
+        if (m.bridge !== b || b.gen !== gen || !b.busy) {
+            return;
+        }
+        b.busy = false;
+        b.status = status & 0x7F;
+        b.out = Uint8Array.from(data ?? []);
+        b.outPos = 0;
+    };
+    const now = host.command(cmd, bytes, answer);
+    if (now !== null && now !== undefined) {
+        answer(now.status, now.data);
+    }
 }
 
 /**
@@ -1023,6 +1160,12 @@ function ioWrite(m, port, value) {
         m.portFF = value & 0xFF;
         setDisplayWatch(m);
         noteRomLoaderIdle(m);
+        return;
+    case 0x6D:
+    case 0x6F:
+        if (m.host !== null) {
+            writeBridge(m, p, value);
+        }
         return;
     default:
         break;
